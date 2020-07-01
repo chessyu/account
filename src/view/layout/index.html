@@ -1,0 +1,362 @@
+<template>
+    <div class="acc_content">
+        <h2>美甲贴账务管理</h2>
+        <div class="acc_query">
+            <Select v-model="level" @on-change="selectLevel" placeholder="请选择代理级别">
+                <Option value="a">三级代理</Option>
+                <Option value="b">二级代理</Option>
+                <Option value="c">一级代理</Option>
+                <Option value="d">特级代理</Option>
+            </Select>
+            <Form class="form_query" ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="80">
+                <FormItem class="item_list" label="钻甲" prop="drill">
+                    <InputNumber  :min="0" v-model="formValidate.drill"  placeholder="Enter your name" ></InputNumber>
+                </FormItem>
+                <FormItem  class="item_list" label="水晶甲" prop="water">
+                    <InputNumber  :min="0" v-model="formValidate.water"  placeholder="Enter your name" ></InputNumber>
+                </FormItem>
+                <FormItem class="item_list" label="普通甲" prop="ordinary">
+                    <InputNumber  :min="0" v-model="formValidate.ordinary"  placeholder="Enter your name" ></InputNumber>
+                </FormItem>
+                <FormItem  class="item_list" label="纹身贴" prop="tattoo">
+                    <InputNumber  :min="0" v-model="formValidate.tattoo"  placeholder="Enter your name" ></InputNumber>
+                </FormItem>
+                <FormItem  class="item_list" label="赠送" prop="free">
+                   <i-input prefix="logo-yen" v-model="formValidate.free">
+                    </i-input>
+                </FormItem>
+                <FormItem  class="item_list" label="是否拿货" prop="hasPurchase">
+                    <Select v-model="formValidate.hasPurchase" @on-change="select">
+                        <Option value="1">是</Option>
+                        <Option value="0">否</Option>
+                    </Select>
+                </FormItem>
+                <template v-if="formValidate.hasPurchase == '1'">
+                    <FormItem class="item_list" label="钻甲" prop="purDrill">
+                        <InputNumber  :min="0" v-model="formValidate.purDrill"  placeholder="Enter your name" ></InputNumber>
+                    </FormItem>
+                    <FormItem  class="item_list" label="水晶甲" prop="purWater">
+                        <InputNumber  :min="0" v-model="formValidate.purWater"  placeholder="Enter your name" ></InputNumber>
+                    </FormItem>
+                    <FormItem class="item_list" label="普通甲" prop="purOrdinary">
+                        <InputNumber  :min="0" v-model="formValidate.purOrdinary"  placeholder="Enter your name" ></InputNumber>
+                    </FormItem>
+                    <FormItem  class="item_list" label="纹身贴" prop="purTattoo">
+                        <InputNumber  :min="0" v-model="formValidate.purTattoo"  placeholder="Enter your name" ></InputNumber>
+                    </FormItem>
+                </template>
+                <FormItem  class="item_list" >
+                    <Button type="primary" icon="md-add" @click="add">新增</Button>
+                    <Button icon="md-sync" @click="reset">重置</Button>
+                </FormItem>
+            </Form>
+        </div>
+        <div class="acc_table">
+            <Table :columns="columns" :data="data" border  height="500">
+                <template slot-scope="{ row, index }" slot="action">
+                    <span class="tableButtom" @click="edit(row,index)" ><Icon type="ios-create-outline" />修改</span>
+                    <span class="tableButtom" @click="deleted(row,index)" ><Icon type="ios-trash-outline" />删除</span>
+                </template>
+            </Table>
+        </div>
+    </div>
+</template>
+
+<script>
+import { mapGetters, mapMutations } from 'vuex'
+export default{
+    data(){
+        return{
+            level:'',
+            price:{
+                drillPrice:6,
+                waterPrice:5.6,
+                ordinaryPrice:3.1,
+                tattooPrice:1.8,
+            },
+            formValidate:{
+                drill:0,  //钻
+                water:0, //水
+                ordinary:0, //普通
+                tattoo:0, //纹身
+                free:'',  //赠送金额
+                hasPurchase:"0", //是否拿
+                purDrill:0,
+                purWater:0,
+                purOrdinary:0,
+                purTattoo:0,
+            },
+            ruleValidate:{},
+            columns:[
+                {
+                    title: '日期',
+                    key: 'date',
+                    align: 'center',
+                    width: 200,
+                    fixed: 'left',
+                    filters: [
+                        {
+                            label: '1月份',
+                            value: 1
+                        },
+                        {
+                            label: '2月份',
+                            value: 2
+                        },
+                        {
+                            label: '3月份',
+                            value: 3
+                        },
+                        {
+                            label: '4月份',
+                            value: 4
+                        },
+                        {
+                            label: '5月份',
+                            value: 5
+                        },
+                        {
+                            label: '6月份',
+                            value: 6
+                        },
+                        {
+                            label: '7月份',
+                            value: 7
+                        },
+                        {
+                            label: '8月份',
+                            value: 8
+                        },
+                        {
+                            label: '9月份',
+                            value: 9
+                        },
+                        {
+                            label: '10月份',
+                            value: 10
+                        },
+                        {
+                            label: '11月份',
+                            value: 11
+                        },
+                        {
+                            label: '12月份',
+                            value: 12
+                        },
+                    ],
+                    filterMultiple: false,
+                    filterMethod (value, row) {
+                        console.log(row,value)
+                        console.log(row.date.split('-')[1] == value);
+                        if (value === 1) return row.date.split('-')[1] == 1;
+                        if (value === 2) return row.date.split('-')[1] == 2;
+                        if (value === 3) return row.date.split('-')[1] == 3;
+                        if (value === 4) return row.date.split('-')[1] == 4;
+                        if (value === 5) return row.date.split('-')[1] == 5;
+                        if (value === 6) return row.date.split('-')[1] == 6;
+                        if (value === 7) return row.date.split('-')[1] == 7;
+                        if (value === 8) return row.date.split('-')[1] == 8;
+                        if (value === 9) return row.date.split('-')[1] == 9;
+                        if (value === 10) return row.date.split('-')[1] == 10;
+                        if (value === 11) return row.date.split('-')[1] == 11;
+                        if (value === 12) return row.date.split('-')[1] == 12;
+                    }
+                },
+                {
+                    title:'数量',
+                    align:'center',
+                    children:[
+                        {
+                            title:'出售',
+                            align:'center',
+                            children:[
+                                {
+                                    title:'钻甲',
+                                    key:'drill',
+                                    align:'center'
+                                },
+                                {
+                                    title:'水晶甲',
+                                    key:'water',
+                                    align:'center'
+                                },
+                                {
+                                    title:'普通甲',
+                                    key:'ordinary',
+                                    align:'center'
+                                },
+                                {
+                                    title:'纹身贴',
+                                    key:'tattoo',
+                                    align:'center'
+                                },
+                                {
+                                    title:'赠送',
+                                    key:'free',
+                                    align:'center'
+                                },
+                            ]
+                        },
+                        {
+                            title:'拿货',
+                            align:'center',
+                            children:[
+                                {
+                                    title:'钻甲',
+                                    key:'purDrill',
+                                    align:'center'
+                                },
+                                {
+                                    title:'水晶甲',
+                                    key:'purWater',
+                                    align:'center'
+                                },
+                                {
+                                    title:'普通甲',
+                                    key:'purOrdinary',
+                                    align:'center'
+                                },
+                                {
+                                    title:'纹身贴',
+                                    key:'purTattoo',
+                                    align:'center'
+                                },
+                            ]
+                        }
+                    ]
+                },
+                {
+                    title:'进货价',
+                    key:'buyingPrice',
+                    align:'center'
+                },
+                {
+                    title:'利润',
+                    key:'profit',
+                    align:'center'
+                },
+                {
+                    title:'操作',
+                    slot:'action',
+                    align:'center',
+                    width:180
+                },
+            ],
+        }
+    },
+    methods:{
+        selectLevel(value){
+            switch(value){
+                case "a":
+                    this.price.drillPrice = 7;
+                    this.price.drillPrice = 7;
+                    this.price.drillPrice = 7;
+                    this.price.drillPrice = 7;
+                    break;
+                case "b":
+                    this.price.drillPrice = 6;
+                    this.price.drillPrice = 5.6;
+                    this.price.drillPrice = 3.1;
+                    this.price.drillPrice = 1.8;
+                    break;
+                case "c":
+                    this.price.drillPrice = 7;
+                    this.price.drillPrice = 7;
+                    this.price.drillPrice = 7;
+                    this.price.drillPrice = 7;
+                    break;
+                case "d":
+                    this.price.drillPrice = 7;
+                    this.price.drillPrice = 7;
+                    this.price.drillPrice = 7;
+                    this.price.drillPrice = 7;
+                    break;
+            }
+        },
+        add(){
+            let data = JSON.parse(JSON.stringify(this.formValidate));
+            let price = this.computPrice();
+            data.buyingPrice = price.buyingPrice;
+            data.profit = price.profit;
+            data.date = this.formatDate();
+            this.data.unshift(data);
+        },
+        edit(row,index){
+
+        },
+        deleted(row,index){
+            this.data.splice(index,1);
+        },
+        reset(){
+            this.$refs['formValidate'].resetFields();
+        },
+        select(value){
+            if(value == '0'){
+                this.formValidate.purDrill = 0;
+                this.formValidate.purWater = 0;
+                this.formValidate.purOrdinary = 0;
+                this.formValidate.purTattoo = 0;
+            }
+        },
+        computPrice(){
+            let buyingPrice = this.formValidate.drill * this.price.drillPrice + this.formValidate.water * this.price.waterPrice+ this.formValidate.ordinary * this.price.ordinaryPrice + this.formValidate.tattoo * this.price.tattooPrice+ this.buyingPrice()
+            let profit = (this.formValidate.drill * 19.9 +  this.formValidate.water * 15 + this.formValidate.ordinary * 9.9 + this.formValidate.tattoo* 5 ) - buyingPrice;
+            return{
+                buyingPrice,
+                profit
+            }
+        },
+        buyingPrice(){
+            return Number(this.formValidate.free);
+        },
+        formatDate(){
+            let date = new Date();
+            return date.getFullYear() +'-' + (date.getMonth() +1) + '-' +date.getDate();
+        },
+        ...mapMutations(['setOldData'])
+    },
+    computed:{
+        ...mapGetters(["getOldData"]),
+        data(){
+            return this.getOldData.reverse();
+        }
+    },
+    watch:{
+        data:{
+            handler(newVlue){
+                this.setOldData(newVlue);
+            },
+            deep:true
+        }
+    }
+}
+</script>
+
+<style lang="less" >
+.acc_content{
+    padding: 10px;
+    width: 100%;
+}
+h2{
+    text-align: center;
+    color: #5d5b5b;
+}
+.form_query{
+    display: flex;
+    flex-flow: wrap;
+    justify-content: space-between;
+    padding-top: 50px;
+    width: 100%;
+    .item_list{
+        min-width: 250px;
+        width: 20%;
+    }
+}
+.tableButtom{
+    cursor: pointer;
+    color: cornflowerblue;
+}
+.ivu-input-number-default{
+    width: 100%;
+}
+</style>
